@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Map CSV columns · FutureFinance{% endblock %}
+{% block content %}
+<div class="page-heading"><div><h1 class="h2 mb-1">Map bank statement columns</h1><p class="text-secondary mb-0">Select the columns that contain each transaction field. Nothing is saved until you confirm the preview.</p></div><a class="btn btn-outline-secondary" href="{{ url_for('transactions') }}">Cancel</a></div>
+<div class="card"><div class="card-body">
+<form method="post" action="{{ url_for('preview_import_transactions') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="token" value="{{ token }}">
+<div class="row g-3">
+{% for field,label,required in [('date','Transaction date',true),('amount','Amount',true),('type','Income or expense',false),('category','Category',false),('merchant_name','Merchant / payee',false),('description','Description / memo',false),('payment_method','Payment method',false)] %}
+<div class="col-md-6"><label class="form-label" for="map_{{ field }}">{{ label }}{% if required %} <span class="text-danger">*</span>{% endif %}</label><select class="form-select" id="map_{{ field }}" name="map_{{ field }}" {% if required %}required{% endif %}><option value="">Not present / leave unmapped</option>{% for header in headers %}<option value="{{ header }}" {% if suggestions[field]==header %}selected{% endif %}>{{ header }}</option>{% endfor %}</select></div>
+{% endfor %}
+<div class="col-md-6"><label class="form-label" for="default_type">Default type when CSV has no type column</label><select class="form-select" id="default_type" name="default_type"><option>EXPENSE</option><option>INCOME</option></select><div class="form-text">Negative amounts are treated as expenses and converted to positive transaction amounts.</div></div>
+</div><div class="d-flex gap-2 mt-4"><button class="btn btn-primary">Validate and preview</button><a class="btn btn-outline-secondary" href="{{ url_for('transactions') }}">Cancel import</a></div>
+</form></div></div>
+<div class="card mt-3"><div class="card-body"><h2 class="h5">Your categories</h2><p class="text-secondary small mb-0">CSV categories are matched to categories belonging to your account. If missing or unrecognized, transparent merchant and description keyword rules suggest a category; review suggestions before confirming.</p><div class="d-flex flex-wrap gap-2 mt-2">{% for c in categories %}<span class="badge text-bg-light border">{{ c.name }} · {{ c.category_type }}</span>{% endfor %}</div></div></div>
+{% endblock %}

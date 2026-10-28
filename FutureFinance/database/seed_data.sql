@@ -1,0 +1,2 @@
+-- Clearly fictional demo records. Run after schema.sql; replace demo password using the app registration flow.
+-- Seed transaction rows are generated through the app's demo seed command so password hashing and IDs remain valid.

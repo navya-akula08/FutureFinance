@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard · FutureFinance{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div><p class="eyebrow mb-1">Your finances</p><h1 class="h2 mb-1">Welcome, {{ session.get('display_name') }}</h1><p class="text-secondary mb-0">A concise view of your recorded activity.</p></div>
+  <form class="d-flex flex-wrap gap-2" aria-label="Dashboard date range">
+    <label class="visually-hidden" for="dashboard-start">Start date</label><input id="dashboard-start" class="form-control" type="date" name="start" value="{{ start }}">
+    <label class="visually-hidden" for="dashboard-end">End date</label><input id="dashboard-end" class="form-control" type="date" name="end" value="{{ end }}">
+    <button class="btn btn-outline-primary">Apply</button>
+  </form>
+</header>
+<div class="row g-3 mb-4">
+{% for label,value in [('Income',summary.income),('Expenses',summary.expense),('Net cash flow',summary.net)] %}<div class="col-md-4"><section class="card metric"><div class="card-body"><div class="text-secondary">{{ label }}</div><div class="h3 mb-0">{{ value|inr }}</div></div></section></div>{% endfor %}
+</div>
+<div class="row g-3">
+  <div class="col-lg-6"><section class="card h-100"><div class="card-body"><div class="section-heading"><div><h2 class="h5 mb-1">Spending breakdown</h2><p class="small text-secondary mb-0">Expenses by category in the selected dates</p></div><a href="{{ url_for('spending') }}">Spending details</a></div>
+  {% if categories %}<div id="categoryChart" class="chart-wrap"></div>{% else %}<div class="empty-state">No transactions recorded for this period yet.<div class="mt-2"><a class="btn btn-primary btn-sm" href="{{ url_for('transactions') }}">Import a statement or add a transaction</a></div></div>{% endif %}</div></section></div>
+  <div class="col-lg-6"><section class="card h-100"><div class="card-body"><div class="section-heading"><h2 class="h5 mb-0">Recent transactions</h2><a href="{{ url_for('transactions') }}">View all</a></div>
+  {% if transactions %}{% include '_transaction_table.html' %}{% else %}<div class="empty-state">Your recent activity will appear here after you record a transaction.<div class="mt-2"><a href="{{ url_for('transactions') }}">Go to Transactions</a></div></div>{% endif %}</div></section></div>
+</div>
+<div class="row g-3 mt-1">
+  <div class="col-lg-5"><section class="card h-100"><div class="card-body"><h2 class="h6">Spending alerts</h2>{% if anomalies.available and anomalies.results %}<ul class="compact-list">{% for a in anomalies.results[:3] %}<li><strong>{{ a.category }}</strong> · {{ a.amount|inr }} on {{ a.transaction_date.strftime('%Y-%m-%d') }}</li>{% endfor %}</ul><a href="{{ url_for('insights') }}">Review insights</a>{% elif anomalies.available %}<p class="text-secondary mb-0">No unusual spending was detected in eligible transaction history.</p>{% else %}<p class="text-secondary mb-0">{{ anomalies.message }} <a href="{{ url_for('transactions') }}">Add transaction history</a> to enable alerts.</p>{% endif %}</div></section></div>
+  <div class="col-lg-7"><section class="card h-100"><div class="card-body"><div class="section-heading"><h2 class="h6 mb-0">Recommendations</h2><a href="{{ url_for('insights') }}">All insights</a></div>{% for r in recommendations[:2] %}<div class="recommendation-row"><strong>{{ r.title }}</strong><p class="mb-1">{{ r.explanation }}</p><small class="text-secondary">{{ r.comparison_period }} · {{ r.suggested_action }}</small></div>{% else %}<p class="text-secondary mb-0">Recommendations appear when there is enough transaction or budget history to compare.</p>{% endfor %}<small class="text-secondary d-block mt-2">Rule-based observations from your stored records.</small></div></section></div>
+</div>
+{% endblock %}
+{% block scripts %}{% if categories %}<script>const cats={{ categories|tojson }};Plotly.newPlot('categoryChart',[{type:'pie',labels:cats.map(x=>x.category),values:cats.map(x=>Number(x.amount)),hole:.55}],{margin:{t:10,b:10,l:10,r:10},legend:{orientation:'h'}},{responsive:true,displayModeBar:false});</script>{% endif %}{% endblock %}

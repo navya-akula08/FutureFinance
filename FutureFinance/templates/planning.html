@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Planning · FutureFinance{% endblock %}
+{% block content %}
+<header class="page-heading"><div><p class="eyebrow mb-1">Planning</p><h1 class="h2 mb-1">Plan your next steps</h1><p class="text-secondary mb-0">Explore scenarios and review reports built from your saved financial records.</p></div></header>
+<div class="row g-3">
+ <div class="col-md-6"><section class="card h-100"><div class="card-body"><p class="eyebrow">Forecast</p><h2 class="h4">Scenario simulator</h2><p class="text-secondary">Compare a baseline with an expense-reduction scenario. Results are estimates and are labeled when history is limited.</p><a class="btn btn-primary" href="{{ url_for('simulator') }}">Open simulator</a></div></section></div>
+ <div class="col-md-6"><section class="card h-100"><div class="card-body"><p class="eyebrow">Review</p><h2 class="h4">Financial reports</h2><p class="text-secondary">Review date-range income, expenses, net cash flow, category totals, and trends; download a CSV summary.</p><a class="btn btn-outline-primary" href="{{ url_for('reports') }}">Open reports</a></div></section></div>
+</div>
+{% endblock %}

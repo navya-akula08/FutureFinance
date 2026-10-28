@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>{% block title %}FutureFinance{% endblock %}</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link href="{{ url_for('static',filename='css/style.css') }}" rel="stylesheet"></head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+ <div class="container">
+  <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">FutureFinance</a>
+  {% if session.get('user_id') %}
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavigation" aria-controls="mainNavigation" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+  <div class="collapse navbar-collapse" id="mainNavigation">
+   <div class="navbar-nav ms-lg-3 me-auto">
+    {% for endpoint,label in [('dashboard','Dashboard'),('transactions','Transactions'),('spending','Spending'),('goals','Goals'),('insights','Insights'),('planning','Planning')] %}
+    <a class="nav-link {% if request.endpoint==endpoint or (endpoint=='transactions' and request.endpoint in ('edit_transaction','import_transactions','preview_import_transactions','confirm_import_transactions')) or (endpoint=='spending' and request.endpoint in ('budgets','categories')) or (endpoint=='goals' and request.endpoint in ('edit_goal','delete_goal','contribute')) or (endpoint=='planning' and request.endpoint in ('simulator','reports','export_report')) %}active{% endif %}" {% if request.endpoint==endpoint %}aria-current="page"{% endif %} href="{{ url_for(endpoint) }}">{{ label }}</a>
+    {% endfor %}
+   </div>
+   <span class="navbar-text me-lg-3">{{ session.get('display_name','') }}</span>
+   <form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-light">Sign out</button></form>
+  </div>
+  {% endif %}
+ </div>
+</nav>
+<main class="container py-4">
+ {% for category,message in get_flashed_messages(with_categories=true) %}<div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>{% endfor %}
+ {% if request.endpoint=='transactions' and anomalies is defined %}{% include '_anomaly_panel.html' %}{% endif %}
+ {% block content %}{% endblock %}
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script><script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>{% block scripts %}{% endblock %}
+</body></html>
